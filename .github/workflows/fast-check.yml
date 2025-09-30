@@ -1,0 +1,55 @@
+name: fast check
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - master
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  fast-check:
+    runs-on: ubuntu-24.04
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    - uses: actions-rs/toolchain@v1
+      with:
+          toolchain: stable
+          profile: minimal
+          override: true
+          components: clippy
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: nightly
+        profile: minimal
+        components: rustfmt
+    - uses: Swatinem/rust-cache@v2
+      with:
+        cache-on-failure: true
+        shared-key: fast-check-cache
+        workspaces: |
+          .
+    - uses: rui314/setup-mold@v1
+      with:
+        mold-version: 2.37.1
+        make-default: false
+    - uses: arduino/setup-protoc@v3
+      with:
+        version: "30.2"
+    - uses: uncenter/setup-taplo@v1
+      with:
+        version: "0.9.3"
+
+    - name: clippy
+      run: cargo clippy --all-targets -- -D warnings
+    - name: fmt
+      run: cargo +nightly fmt --all -- --check
+    - name: Toml fmt
+      run: taplo fmt --check

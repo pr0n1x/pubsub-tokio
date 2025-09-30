@@ -1,0 +1,46 @@
+name: nightly check
+
+on:
+  schedule:
+    - cron: "0 1 * * *"
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  nightly-check:
+    runs-on: ubuntu-24.04
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    - uses: actions-rs/toolchain@v1
+      with:
+          toolchain: stable
+          profile: minimal
+          override: true
+          components: clippy
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: nightly
+        profile: minimal
+        components: rustfmt
+    - uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: |
+          .
+    - uses: rui314/setup-mold@v1
+      with:
+        mold-version: 2.37.1
+        make-default: false
+    - uses: arduino/setup-protoc@v3
+      with:
+        version: "30.2"
+    - name: Install cargo hack
+      uses: taiki-e/cache-cargo-install-action@v1
+      with:
+        tool: cargo-hack@0.6.36
+
+    - name: check all
+      run: cargo hack check --all

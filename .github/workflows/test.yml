@@ -1,0 +1,59 @@
+name: test
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - master
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+      - uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+          # use different cache from others
+          key: test
+
+      - uses: rui314/setup-mold@v1
+        with:
+          mold-version: 2.37.1
+          make-default: false
+      - uses: arduino/setup-protoc@v3
+        with:
+          version: "30.2"
+
+      - name: Run tests
+        run: >-
+          cargo test -F test-env
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
