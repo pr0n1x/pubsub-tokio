@@ -1,11 +1,11 @@
 [package]
 authors = ["Maksim Makarov aka pr0n1x <maxim.pronix@gmail.com>"]
-edition = "2021"
+edition.workspace = true
 description = "Fun-out pattern implementation based on tokio mpsc channels"
 name = "pubsub-tokio"
 license = "MIT OR Apache-2.0"
 keywords = ["pubsub", "fan-out", "tokio", "async", "channels"]
-repository = "github.com/pr0n1x/pubsub-tokio"
+repository = "https://github.com/pr0n1x/pubsub-tokio"
 version = "1.0.0"
 
 [dependencies]
