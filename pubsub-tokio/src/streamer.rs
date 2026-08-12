@@ -22,8 +22,8 @@ pub trait IntoStream<T> {
     fn into_stream(self) -> impl Stream<Item = T> + Send;
 }
 
-/// This extension trait is used only for inference in an IDE,
-/// in cases with a lot of nested stream-combinators.
+/// This extension trait exists only to help an IDE with type inference
+/// in cases involving many nested stream combinators.
 pub trait InferStream: Stream {
     fn infer_stream(self) -> impl Stream<Item = Self::Item>;
 }
@@ -105,10 +105,10 @@ pin_project! {
 }
 
 pin_project! {
-    /// It different from tokio_stream::StreamExt::filter_map
+    /// It differs from tokio_stream::StreamExt::filter_map
     /// in that it returns Pending when the callback returns None.
-    /// Theoretically, when in a stream (of type tokio_stream::stream_ext::FilterMap)
-    /// we have a lot of filtered-out items (Fn(S::Item) -> None),
+    /// Theoretically, when a stream (of type tokio_stream::stream_ext::FilterMap)
+    /// contains a long run of filtered-out items (Fn(S::Item) -> None),
     /// it can lead to busy-looping.
     pub struct FilterMapRelaxedStream<S, F> {
         #[pin]

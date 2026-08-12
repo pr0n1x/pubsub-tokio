@@ -138,8 +138,8 @@ impl<T: Clone, const N: usize> PubSub<T, N> {
                 data_senders: HashMap::new(),
                 filters: HashMap::new(),
                 on_dispatch: None,
-                // we can use UnboundSender without caring about it's size
-                // because it can't be larger than the current subscription count
+                // we can use an UnboundedSender without worrying about its size
+                // because it can't grow larger than the current subscription count
                 disconnection_notifier: unbounded_channel(),
             },
             publisher: data_sender,
@@ -503,7 +503,7 @@ impl<T: Clone + Debug, const N: usize> Dispatcher<T, N> {
         let disconnect_sender = self.disconnection_notifier.0.clone();
         let senders = self.data_senders.values().map(Clone::clone).collect::<Box<[_]>>();
         let log_prefix = self.log_prefix.to_string();
-        // there are a few subscribers, so it's ok to clone
+        // there are only a few subscribers, so it's ok to clone
         let filters = Rc::new(self.filters.clone());
         if let Some(on_dispatch) = &self.on_dispatch {
             packet.on_transfer(on_dispatch);
@@ -609,7 +609,7 @@ impl<T: Clone + Debug, const N: usize> Dispatcher<T, N> {
                     Some(ConnectionMessage::Filter(id, filter)) => {
                         tracing::info!("{pfx}: set filter for subscriber id = {id}");
                         if self.filters.insert(id, FilterInner::from(filter)).is_some() {
-                            tracing::warn!("{pfx}: filter for subscriber id = {id} replaced an existed filter");
+                            tracing::warn!("{pfx}: filter for subscriber id = {id} replaced an existing filter");
                         }
                     },
                     Some(ConnectionMessage::RemoveFilter(id)) => {
@@ -660,7 +660,7 @@ impl<T: Clone + Debug, const N: usize> Dispatcher<T, N> {
                         }
                         self.broadcast_packet(Packet::Data(data)).await;
                     } else {
-                        tracing::trace!("{pfx}: not subscribers, drain data");
+                        tracing::trace!("{pfx}: no subscribers, draining data");
                     }
                 },
                 _ = heartbeat_interval.tick() => {

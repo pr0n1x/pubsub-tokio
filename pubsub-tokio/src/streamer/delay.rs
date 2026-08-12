@@ -121,7 +121,7 @@ where
                     Poll::Pending => match next {
                         Poll::Pending | Poll::Ready(None) => Poll::Pending,
                         Poll::Ready(Some(())) => {
-                            // If the expiration buffer is sleeping (till next expiration),
+                            // If the expiration buffer is sleeping (until the next expiration),
                             // we also need to poll the main stream, hence we have to wake up here.
                             cx.waker().wake_by_ref();
                             Poll::Pending
@@ -130,7 +130,7 @@ where
                     Poll::Ready(None) => match next {
                         Poll::Ready(Some(())) => {
                             // The expiration buffer is exhausted, but we still have the next item,
-                            // therefore, we need to wake up to poll the main stream again.
+                            // so we need to wake up to poll the main stream again.
                             cx.waker().wake_by_ref();
                             Poll::Pending
                         },
@@ -196,7 +196,7 @@ where
             match (self.as_mut().poll_next_item(cx), &self.stage) {
                 (Poll::Ready(Some(item)), _) => return Poll::Ready(Some(item)),
                 (Poll::Ready(None), _) => return Poll::Ready(None),
-                // there is no need to force retry if the stream is exhausted
+                // there is no need to force a retry if the stream is exhausted
                 (Poll::Pending, PartiallyDelayedStage::Exhausted) => return Poll::Pending,
                 (Poll::Pending, _) => {
                     pending_retries += 1;
@@ -229,7 +229,7 @@ where
                     Poll::Ready(None) => {
                         projection.stage.set(PartiallyDelayedStage::Exhausted);
                     },
-                    // 50% change to poll the next delayed item
+                    // 50% chance to poll the next delayed item
                     Poll::Pending => {
                         if !projection.buffer.is_empty() && rand::rng().random_bool(0.5) {
                             projection.stage.set(PartiallyDelayedStage::Delayed);
@@ -313,7 +313,7 @@ mod tests {
         sent: Instant,
         seq_no: u64,
         #[allow(dead_code)]
-        heavy: [u8; 1024 * 20], // 20 Kib of data to simulate a heavy item
+        heavy: [u8; 1024 * 20], // 20 KiB of data to simulate a heavy item
     }
 
     async fn run_stream() -> StreamDelayTest {
@@ -328,7 +328,7 @@ mod tests {
                         .send(TestStreamItem {
                             sent: Instant::now(),
                             seq_no,
-                            heavy: [1; 1024 * 20], // 20 Kib of data
+                            heavy: [1; 1024 * 20], // 20 KiB of data
                         })
                         .await
                         .unwrap();
