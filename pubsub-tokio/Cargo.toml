@@ -6,7 +6,8 @@ name = "pubsub-tokio"
 license = "MIT OR Apache-2.0"
 keywords = ["pubsub", "fan-out", "tokio", "async", "channels"]
 repository = "https://github.com/pr0n1x/pubsub-tokio"
-version = "1.0.0"
+readme = "../README.md"
+version = "1.0.1"
 
 [dependencies]
 futures-core.workspace = true

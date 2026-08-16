@@ -39,7 +39,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-pubsub-tokio = { version = "1.0.0", features = ["tokio-stream"] }
+pubsub-tokio = { version = "1.0.1", features = ["tokio-stream"] }
 ```
 
 Cargo features:
